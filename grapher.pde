@@ -31,18 +31,18 @@ class Grapher {
 
     if(mousePressed) {
       line(mouseX, 0, mouseX, height);
-      int index = step-(width-mouseX)/pixeloff;
+      int index = step+(mouseX-width)/pixeloff;
       if(index >= 0 && index < log.size()) {
         // println(index + ": " + map(log.getJSONObject(index).getInt("y"), 0, width, 1, 0));
 
         pushStyle();
         stroke(0);
-        strokeWeight(1.8);
+        strokeWeight(1.5);
         fill(255);
         rect(1, 1, 200, 100);
         strokeWeight(1);
         fill(0);
-        text("step: " + step + "\nvalue: " + map(log.getJSONObject(index).getInt("y"), 0, width, 1, 0), 100, 50);
+        text("step: " + index + "\nvalue: " + (width-(log.getJSONObject(index).getInt("y"))), 100, 50);
         popStyle();
       }
     }
@@ -76,7 +76,7 @@ class Grapher {
     it.setInt("y", y);
     log.setJSONObject(step, it);
 
-    if(log.size() >= jsonmemory) {
+    if(log.size() == jsonmemory) {
       log.remove(0);
     }
 

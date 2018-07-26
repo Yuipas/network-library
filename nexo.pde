@@ -29,6 +29,37 @@ class Nexo {
     init();
   }
 
+  Nexo(JSONObject JNexo) {
+    setActivationFunction(JNexo.getString("activation"));
+    this.inputShape = JNexo.getInt("inputShape");
+    this.outputShape = JNexo.getInt("outputShape");
+
+    if(!JNexo.isNull("bias")) {
+      bias = createTensor(JNexo.getJSONArray("bias"));
+    }
+    if(!JNexo.isNull("weights")) {
+      bias = createTensor(JNexo.getJSONArray("weights"));
+    }
+
+  }
+
+  JSONObject toJSON() {
+    JSONObject JNexo = new JSONObject();
+
+    JNexo.setString("activation", activation);
+    JNexo.setInt("inputShape", inputShape);
+    JNexo.setInt("outputShape", outputShape);
+
+    if(bias != null) {
+      JNexo.setJSONArray("bias", bias.toJSON());
+    }
+    if(weights != null) {
+      JNexo.setJSONObject("weights", weights.toJSON());
+    }
+
+    return JNexo;
+  }
+
   void linkNexo(Nexo n) {
     this.outputShape = n.inputShape;
     this.links = inputShape * outputShape;

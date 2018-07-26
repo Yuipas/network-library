@@ -22,7 +22,35 @@ class Network {
     costHistory = createTensor(0);
   }
 
+  Network(JSONObject JNN) {
+    network = new Nexo[0];
+    layers = JNN.getJSONArray("#layers").getIntArray();
+
+    JSONArray JNetwork = JNN.getJSONArray("network");
+
+    for(int i = 0; i < JNetwork.size(); i++) {
+      JSONObject JNexo = JNetwork.getJSONObject(i);
+      network = (Nexo[]) append(network, new Nexo(JNexo));
+    }
+  }
+
   // TODO: json functionality
+
+  JSONObject toJSON() {
+    JSONObject JNN = new JSONObject();
+    JSONArray JLayers = new JSONArray();
+
+    for(int i = 0; i < layers.length; JLayers.setInt(i, layers[i++]));
+    JNN.setJSONArray("#layers", JLayers);
+
+    JLayers = new JSONArray();
+    for(Nexo nexo : network) {
+      JLayers.append(nexo.toJSON());
+    }
+    JNN.setJSONArray("network", JLayers);
+
+    return JNN;
+  }
 
   /*INITIALIZATION FUNCTIONS*/
 
@@ -335,5 +363,5 @@ Network loadNetwork(String filename) {
 }
 
 void saveNetwork(Network nn, String filename) {
-  // saveJSONObject(nn.toJSON(), networksPath + filename);
+  saveJSONObject(nn.toJSON(), networksPath + filename);
 }

@@ -1,12 +1,9 @@
-int green = color(21, 255, 21);
-int red = color(255, 21, 21);
-
 Network nn;
 int scalar = 200;
 
 boolean drawing = true;
 boolean training = false;
-
+boolean loop = true;
 
 Grapher gp;
 
@@ -18,14 +15,13 @@ void setup() {
 
   nn = new Network();
   {
-    Nexo inputs = new Nexo(2);
-    Nexo hidden1 = new Nexo(16);
-    Nexo hidden2 = new Nexo(16);
-    Nexo outputs = new Nexo(3);
+    Nexo inputs = new Nexo(100);
+    Nexo hidden1 = new Nexo(99);
+    Nexo outputs = new Nexo(100);
 
     nn.join(inputs);
     nn.join(hidden1);
-    nn.join(hidden2);
+    // nn.join(hidden2);
     nn.join(outputs);
 
     nn.flush();
@@ -50,7 +46,7 @@ void draw() {
   }
 
   if(frameCount % 6 == 1) {
-    nn.setupScheme(op);
+    nn.setupScheme();
   }
 
   gp.add(nn.cost / (1.0 * nn.layers[nn.layers.length-1]));
@@ -61,22 +57,13 @@ void draw() {
   } else {
     gp.update(width, height);
   }
+
+  fill(0);
+  text(int(frameRate) + " fps", width*0.9, height*0.1);
 }
 
-void keyPressed() {
-  if(key == ' ') {
-    if(drawing) {
-      drawing = false;
-    } else {
-      drawing = true;
-    }
-    println("drawing: " + drawing);
-
-    background(255);
-  }
-
-  if(key == 's') {
-    saveNetwork(nn, "temp.nn");
-  }
-
+void train() {
+  training = true;
+  //
+  training = false;
 }

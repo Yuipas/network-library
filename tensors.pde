@@ -17,22 +17,20 @@ class Tensor1d {
     arrayCopy(dat, this.data);
   }
 
-  Tensor1d(JSONObject JTensor1d) {
-    this.data = JTensor1d.getJSONArray("data").getFloatArray();
+  Tensor1d(JSONArray JTensor1d) {
+    this.data = JTensor1d.getFloatArray();
   }
 
   /*INITIALIZATION && CONVERTION FUNCTIONS*/
 
-  JSONObject toJSON() {
-    JSONObject JTensor1d = new JSONObject();
+  JSONArray toJSON() {
     JSONArray JData = new JSONArray();
 
     for(int i = 0; i < size(); i++) {
       JData.setFloat(i, data[i]);
     }
-    JTensor1d.setJSONArray("data", JData);
 
-    return JTensor1d;
+    return JData;
   }
 
 
@@ -917,6 +915,10 @@ Tensor2d createTensor(int rows, int cols) {
 
 Tensor2d createTensor(float[][] dat) {
   return new Tensor2d(dat);
+}
+
+Tensor1d createTensor(JSONArray Tensor1) {
+  return new Tensor1d(Tensor1);
 }
 
 Tensor2d createTensor(JSONObject Tensor2) {
