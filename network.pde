@@ -12,7 +12,7 @@ class Network {
   int steps;
 
   float cost;
-  Tensor1d costHistory; 
+  Tensor1d costHistory;
 
   int costMemory = 40;
 
@@ -103,7 +103,7 @@ class Network {
       inputs = network[i].predict(inputs);
     }
 
-    int index = network.length-1; //last layer of the network.
+    int index = network.length-1; //last nexo of the network.
     return network[index].inputs;
   }
 
@@ -136,10 +136,6 @@ class Network {
 
     for(int layerI = network.length-2; layerI >= 0; layerI--) {
 
-      // Layer layer = network[layerI].copy();
-      // Tensor2d hidden = transpose(fromLayerToTensor(layer));
-      // Tensor2d deltas = mult(gradients, hidden);
-      // Tensor2d who_t = transpose(fromLayerWeightsToTensor(layer));
       Nexo nexo = network[layerI];
       Tensor2d hidden = transpose(nexo.inputs.toTensor2d());
       Tensor2d deltas = mult(gradients, hidden);
@@ -171,33 +167,33 @@ class Network {
 
   float getLR() {
     float x = steps / 100.0;
-    x = exp(x)/pow(3, x);
+    x = exp(x) / pow(3, x);
     if (x != x || x == infinity || x == -infinity) {
       x = 1E-5;
       lrAuto = false;
-      println("error detected.");
+      println("error detected. (fixed)");
     }
     return x;
   }
 
 
-  /*AESTHETIC FUNCTIONS* /
+  /*AESTHETIC FUNCTIONS*/
 
   boolean setupScheme() {
-    return setupScheme(new JSONObject());
+    return setupScheme(null);
   }
 
   boolean setupScheme(JSONObject options) {
 
     /* Returns false if the scheme is already done.
-    * /
+    */
 
     boolean redo = false;
-    float sqsize = 20; // by default sqsize = min(w, h) /
     int w = width;
     int h = height;
+    float sqsize = min(w, h) / 20;
 
-    {//loading options from json
+    if (options != null) {//loading options from json
       if(!options.isNull("redo")) {
         redo = options.getBoolean("redo");
       }
@@ -205,10 +201,10 @@ class Network {
         sqsize = options.getFloat("sqsize");
       }
       if(!options.isNull("width")) {
-        width = options.getInt("width");
+        w = options.getInt("width");
       }
       if(!options.isNull("height")) {
-        height = options.getInt("height");
+        h = options.getInt("height");
       }
     }
 
@@ -225,23 +221,23 @@ class Network {
 
     for(int actuallayer = 0; actuallayer < layers.length; actuallayer++) {
 
-      Layer layer = network[actuallayer];
-      int totalneurons = layer.nodes.length;
+      Nexo nexo = network[actuallayer];
+      int totalneurons = nexo.inputShape;
       int x = (actuallayer+1) * w / (layers.length+1);
 
-      for(int innode = 0; innode < layer.nodes.length; innode++) {
+      for(int innode = 0; innode < nexo.inputShape; innode++) {
 
-        for(int outnode = 0; outnode < layer.links && actuallayer < layers.length-1; outnode++) {
+        for(int outnode = 0; outnode < nexo.outputShape && actuallayer < layers.length-1; outnode++) {
 
-          float weight = layer.nodes[innode].weights[outnode];
+          float weight = nexo.weights.get(outnode, innode); // [innode].weights[outnode];
 
           pg.stroke(getColor(weight));
 
           int xtemp = w/(layers.length+1);
           int x1 = (actuallayer+1) * xtemp +10;
-          int y1 = (innode+1) * h/(layer.nodes.length+1) +10;
+          int y1 = (innode+1) * h/(nexo.inputShape+1) +10;
           int x2 = (actuallayer+2) * xtemp +10;
-          int y2 = (outnode+1) * h/(network[actuallayer+1].nodes.length+1) +10;
+          int y2 = (outnode+1) * h/(network[actuallayer].outputShape+1) +10;
           pg.line(x1, y1, x2, y2);
         }
 
@@ -316,9 +312,9 @@ class Network {
       for(float y = 0; y < 1; y += 1/res)
       {
         float[] inputs = {x, y};
-        float output = predict(inputs)[0];
+        float[] output = predict(inputs);
 
-        pg.fill(output*255);
+        pg.fill(output[0]*255, output[1]*255, output[2]*255);
         pg.rect(x*scalar, y*scalar, squareRes, squareRes);
         // println("["+(x+y)+"] " + output);
       }
@@ -329,7 +325,6 @@ class Network {
     return pg.get();
   }
 
-  */
 }
 
 

@@ -12,7 +12,7 @@ Grapher gp;
 
 void setup() {
 
-  size(500, 500);
+  size(600, 600);
   background(255);
   noSmooth();
 
@@ -49,103 +49,26 @@ void draw() {
     thread("train");
   }
 
-  if(frameCount % 6 == 0) {
-    test();
+  if(frameCount % 6 == 1) {
+    nn.setupScheme(op);
   }
-  
+
   gp.add(nn.cost / (1.0 * nn.layers[nn.layers.length-1]));
-  gp.update();
-}
 
-void train() {
-  training = true;
-
-  for(int i = 0; i < 100; i++) {
-    float xs[];
-    float ys[];
-
-    int rand = int(random(4));
-
-    if(rand == 3) {
-      float xs2[] = {0, 0};
-      float ys2[] = {1, 0, 0};
-
-      xs = xs2;
-      ys = ys2;
-    } else if(rand == 2) {
-      float xs2[] = {1, 0};
-      float ys2[] = {0, 1, 0};
-
-      xs = xs2;
-      ys = ys2;
-    } else if(rand == 1) {
-      float xs2[] = {0, 1};
-      float ys2[] = {1, 1, 0};
-
-      xs = xs2;
-      ys = ys2;
-    } else {
-      float xs2[] = {1, 1};
-      float ys2[] = {0, 0, 1};
-
-      xs = xs2;
-      ys = ys2;
-    }
-
-    nn.fit(xs, ys);
-  }
-
-  training = false;
-}
-
-void test() {
-  float xs[];
-  float ys[];
-
-  int rand = int(random(4));
-
-  if(rand == 3) {
-    float xs2[] = {0, 0};
-    float ys2[] = {1, 0, 0};
-
-    xs = xs2;
-    ys = ys2;
-  } else if(rand == 2) {
-    float xs2[] = {1, 0};
-    float ys2[] = {0, 1, 0};
-
-    xs = xs2;
-    ys = ys2;
-  } else if(rand == 1) {
-    float xs2[] = {0, 1};
-    float ys2[] = {1, 1, 0};
-
-    xs = xs2;
-    ys = ys2;
+  if(drawing) {
+    background(255);
+    image(nn.scheme, 0, 0);
   } else {
-    float xs2[] = {1, 1};
-    float ys2[] = {0, 0, 1};
-
-    xs = xs2;
-    ys = ys2;
+    gp.update(width, height);
   }
-
-  println("inputs: ");
-  println(xs);
-  println("outputs: ");
-  println(nn.predict(xs));
-  println("targets: ");
-  println(ys);
 }
 
 void keyPressed() {
   if(key == ' ') {
     if(drawing) {
       drawing = false;
-      frameRate(3);
     } else {
       drawing = true;
-      frameRate(1);
     }
     println("drawing: " + drawing);
 

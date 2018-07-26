@@ -58,11 +58,11 @@ class Nexo {
 
   void randomize() {
     if(weights != null) {
-      weights.randomize();
+      weights.randomize(MINWEIGHT, MAXWEIGHT);
     }
 
     if(bias != null) {
-      bias.randomize();
+      bias.randomize(MINBIAS, MAXBIAS);
     }
   }
 
@@ -100,14 +100,16 @@ class Nexo {
 
   void applyBiasDeltas(Tensor1d deltas) {
     if(deltas.containsNaN()) {
-      println("infinity error");
+      deltas.print();
+      throw new IllegalArgumentException("infinity error");
     }
     bias.add(deltas);
   }
 
   void applyWeightsDeltas(Tensor2d deltas) {
     if(deltas.containsNaN()) {
-      println("infinity error");
+      deltas.print();
+      throw new IllegalArgumentException("infinity error");
     }
     weights.add(deltas);
   }

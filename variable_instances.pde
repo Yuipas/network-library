@@ -16,18 +16,25 @@ final float MAXBIAS = +1;
 color getColor(float val)
 {
   color col = color(255);
-  if (val < 0)
-  {
-    float r = constrain(-val * 255, 0, 255);
-    float gb = constrain(val * 255 * -sigmoid(val), 10, 100);
-    col = color(r, gb, gb);
+  if (val < 0) {
+    // rgb(250, 128, 114)
+    val = abs(val);
+    float r = constrain(250 * val, 0, 250);
+    float g = constrain(128 * val, 0, 128);
+    float b = constrain(114 * val, 0, 114);
+    col = color(r, g, b);
+  } else if (val > 0) {
+    // rgb(70, 130, 180)
+    // rgb(50, 205, 50)
+    float r = constrain(70 * val, 0, 70);
+    float g = constrain(130 * val, 0, 130);
+    float b = constrain(180 * val, 0, 180);
+    // float r = constrain(50 * val, 0, 50);
+    // float g = constrain(205 * val, 0, 205);
+    // float b = constrain(50 * val, 0, 50);
+    col = color(r, g, b);
   }
-  if (val > 0)
-  {
-    float g = constrain(val * 255, 0, 255);
-    float rb = constrain(val * 255 * -sigmoid(val), 10, 100);
-    col = color(rb, g, rb);
-  }
+
   return col;
 }
 

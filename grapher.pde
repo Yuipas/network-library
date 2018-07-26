@@ -22,18 +22,28 @@ class Grapher {
     pg.endDraw();
   }
 
-  void show() {
-    image(pg, 0, 0, width, height);
+  void show(int w, int h) {
+    image(pg, 0, 0, w, h);
   }
 
-  void update() {
-    show();
+  void update(int w, int h) {
+    show(w, h);
 
     if(mousePressed) {
       line(mouseX, 0, mouseX, height);
       int index = step-(width-mouseX)/pixeloff;
       if(index >= 0 && index < log.size()) {
-        println(index + ": " + map(log.getJSONObject(index).getInt("y"), 0, width, 1, 0));
+        // println(index + ": " + map(log.getJSONObject(index).getInt("y"), 0, width, 1, 0));
+
+        pushStyle();
+        stroke(0);
+        strokeWeight(1.8);
+        fill(255);
+        rect(1, 1, 200, 100);
+        strokeWeight(1);
+        fill(0);
+        text("step: " + step + "\nvalue: " + map(log.getJSONObject(index).getInt("y"), 0, width, 1, 0), 100, 50);
+        popStyle();
       }
     }
   }

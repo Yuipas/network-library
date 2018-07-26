@@ -187,6 +187,13 @@ class Tensor1d {
     }
   }
 
+  void randomize(float min, float max) {
+    for (int i = 0; i < size(); i++) {
+      this.data[i] = int(random(min, max)*100);
+      this.data[i] /= 100.0;
+    }
+  }
+
   void add(float scalar) {
     for (int i = 0; i < this.size(); i++) {
       this.data[i] += scalar;
@@ -683,6 +690,15 @@ class Tensor2d {
     for (int i = 0; i < rows(); i++) {
       for (int j = 0; j < cols(); j++) {
         this.data[i][j] = int(random(n));
+      }
+    }
+  }
+
+  void randomize(float min, float max) {
+    for (int i = 0; i < rows(); i++) {
+      for (int j = 0; j < cols(); j++) {
+        float val = int(random(min, max)*100);
+        this.data[i][j] = val / 100.0;
       }
     }
   }
