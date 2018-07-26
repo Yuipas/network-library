@@ -31,17 +31,6 @@ color getColor(float val)
   return col;
 }
 
-
-float[] fillWithVal(float val, int arlength) {
-  float[] outputs = new float[arlength];
-
-  for(int i = 0; i < arlength; i++) {
-    outputs[i] = val;
-  }
-
-  return outputs;
-}
-
 int indexof(float[] arr, float search) {
   if (arr == null)   return -1;
 
@@ -50,8 +39,6 @@ int indexof(float[] arr, float search) {
 
   return -1;
 }
-
-
 
 int sum(int[] arr) {
   float[] temp = float(arr);

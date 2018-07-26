@@ -12,7 +12,7 @@ class Network {
   int steps;
 
   float cost;
-  tensor1d costHistory;
+  Tensor1d costHistory; 
 
   int costMemory = 40;
 
@@ -97,7 +97,7 @@ class Network {
     return predict(createTensor(inputs)).toArray();
   }
 
-  tensor1d predict(tensor1d inputs) {
+  Tensor1d predict(Tensor1d inputs) {
 
     for(int i = 0; i < network.length; i++) {
       inputs = network[i].predict(inputs);
@@ -113,42 +113,42 @@ class Network {
     fit(createTensor(inputs), createTensor(targets));
   }
 
-  void fit(tensor1d inputs, tensor1d targets) {
+  void fit(Tensor1d inputs, Tensor1d targets) {
     steps++;
 
     if(lrAuto) {
       learningRate = getLR();
     }
 
-    tensor1d outputs = predict(inputs);
-    tensor1d out_errors = sub(targets, outputs);
+    Tensor1d outputs = predict(inputs);
+    Tensor1d out_errors = sub(targets, outputs);
 
 
-    tensor2d gradients = outputs.toTensor2d();
+    Tensor2d gradients = outputs.toTensor2d();
 
     gradients.map("d" + network[network.length-1].activation);
     gradients.mult(out_errors.toTensor2d());
     gradients.mult(learningRate);
 
-    tensor1d lasterrors = out_errors;
+    Tensor1d lasterrors = out_errors;
 
     calculateCost(out_errors.copy());
 
     for(int layerI = network.length-2; layerI >= 0; layerI--) {
 
       // Layer layer = network[layerI].copy();
-      // tensor2d hidden = transpose(fromLayerToTensor(layer));
-      // tensor2d deltas = mult(gradients, hidden);
-      // tensor2d who_t = transpose(fromLayerWeightsToTensor(layer));
+      // Tensor2d hidden = transpose(fromLayerToTensor(layer));
+      // Tensor2d deltas = mult(gradients, hidden);
+      // Tensor2d who_t = transpose(fromLayerWeightsToTensor(layer));
       Nexo nexo = network[layerI];
-      tensor2d hidden = transpose(nexo.inputs.toTensor2d());
-      tensor2d deltas = mult(gradients, hidden);
-      tensor2d who_t = transpose(nexo.weights);
+      Tensor2d hidden = transpose(nexo.inputs.toTensor2d());
+      Tensor2d deltas = mult(gradients, hidden);
+      Tensor2d who_t = transpose(nexo.weights);
 
       network[layerI+1].applyBiasDeltas(gradients.toTensor1d());
       network[layerI].applyWeightsDeltas(deltas);
 
-      tensor2d errors = mult(who_t, lasterrors.toTensor2d());
+      Tensor2d errors = mult(who_t, lasterrors.toTensor2d());
       lasterrors = errors.toTensor1d();
 
       gradients = transpose(hidden);
@@ -158,7 +158,7 @@ class Network {
     }
   }
 
-  void calculateCost(tensor1d errors) {
+  void calculateCost(Tensor1d errors) {
     errors.pow(2);
     cost = errors.sum();
 

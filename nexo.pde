@@ -4,11 +4,11 @@ class Nexo {
   int outputShape;
   int links;
 
-  tensor1d inputs;
-  tensor1d outputs;
+  Tensor1d inputs;
+  Tensor1d outputs;
 
-  tensor1d bias;
-  tensor2d weights;
+  Tensor1d bias;
+  Tensor2d weights;
 
   String activation = "sigmoid";
 
@@ -66,7 +66,7 @@ class Nexo {
     }
   }
 
-  tensor1d predict(tensor1d inputs) {
+  Tensor1d predict(Tensor1d inputs) {
     setInputs(inputs);
     applyBias();
     applyActivation();
@@ -75,7 +75,7 @@ class Nexo {
     return outputs;
   }
 
-  void setInputs(tensor1d in) {
+  void setInputs(Tensor1d in) {
     inputs = in.copy();
   }
 
@@ -98,14 +98,14 @@ class Nexo {
   }
 
 
-  void applyBiasDeltas(tensor1d deltas) {
+  void applyBiasDeltas(Tensor1d deltas) {
     if(deltas.containsNaN()) {
       println("infinity error");
     }
     bias.add(deltas);
   }
 
-  void applyWeightsDeltas(tensor2d deltas) {
+  void applyWeightsDeltas(Tensor2d deltas) {
     if(deltas.containsNaN()) {
       println("infinity error");
     }

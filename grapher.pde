@@ -33,7 +33,6 @@ class Grapher {
       line(mouseX, 0, mouseX, height);
       int index = step-(width-mouseX)/pixeloff;
       if(index >= 0 && index < log.size()) {
-        println("(" +log.size()+ ")");
         println(index + ": " + map(log.getJSONObject(index).getInt("y"), 0, width, 1, 0));
       }
     }

@@ -1,23 +1,23 @@
 PApplet sketch;
 
-class tensor1d {
+class Tensor1d {
 
   private float data[];
 
-  tensor1d() {
+  Tensor1d() {
     this.data = new float[0];
   }
 
-  tensor1d(int l) {
+  Tensor1d(int l) {
     this.data = new float[l];
   }
 
-  tensor1d(float[] dat) {
+  Tensor1d(float[] dat) {
     this.data = new float[dat.length];
     arrayCopy(dat, this.data);
   }
 
-  tensor1d(JSONObject JTensor1d) {
+  Tensor1d(JSONObject JTensor1d) {
     this.data = JTensor1d.getJSONArray("data").getFloatArray();
   }
 
@@ -35,36 +35,31 @@ class tensor1d {
     return JTensor1d;
   }
 
-  void abs() {
-    for(int i = 0; i < size(); i++) {
-      set(i, sketch.abs(get(i)));
-    }
+
+  Tensor1d copy() {
+    return new Tensor1d(data);
   }
 
-  tensor1d copy() {
-    return new tensor1d(data);
+  Tensor2d toTensor2d() {
+    Tensor2d Tensor = new Tensor2d(size(), 0);
+
+    Tensor.pushCol(this.copy());
+    return Tensor;
   }
 
-  tensor2d toTensor2d() {
-    tensor2d tensor = new tensor2d(size(), 0);
-
-    tensor.pushCol(this.copy());
-    return tensor;
-  }
-
-  tensor2d toTensor2d(int cols) {
-    tensor2d tensor = createTensor(ceil(float(size())/float(cols)), cols);
-    int rows = tensor.rows();
+  Tensor2d toTensor2d(int cols) {
+    Tensor2d Tensor = createTensor(ceil(float(size())/float(cols)), cols);
+    int rows = Tensor.rows();
     for(int i = 0; i < rows; i++) {
       for(int j = 0; j < cols; j++) {
-        tensor.data[i][j] = get(i*rows+j);
+        Tensor.data[i][j] = get(i*rows+j);
       }
     }
-    return tensor;
+    return Tensor;
   }
 
   void resize(int l) {
-    tensor1d newtensor = new tensor1d(l);
+    Tensor1d newTensor = new Tensor1d(l);
     int maxle = l;//sketch.max(size(), l);
 
     for(int i = 0; i < maxle; i++) {
@@ -73,9 +68,9 @@ class tensor1d {
       if(i < size()) {
         newval = get(i);
       }
-      newtensor.set(i, newval);
+      newTensor.set(i, newval);
     }
-    this.data = newtensor.data;
+    this.data = newTensor.data;
   }
 
   float[] toArray() {
@@ -96,7 +91,7 @@ class tensor1d {
     data = (float[]) concat(data, f);
   }
 
-  void push(tensor1d f) {
+  void push(Tensor1d f) {
     data = (float[]) concat(data, f.toArray());
   }
 
@@ -160,6 +155,12 @@ class tensor1d {
 
   /*ACTION FUNCTIONS*/
 
+  void abs() {
+    for(int i = 0; i < size(); i++) {
+      set(i, sketch.abs(get(i)));
+    }
+  }
+
   void setAll(float val) {
     for(int i = 0; i < size(); i++) {
       data[i] = val;
@@ -192,9 +193,9 @@ class tensor1d {
     }
   }
 
-  void add(tensor1d tensor) {
+  void add(Tensor1d Tensor) {
     for (int i = 0; i < this.size(); i++) {
-      this.data[i] += tensor.data[i];
+      this.data[i] += Tensor.data[i];
     }
   }
 
@@ -202,23 +203,23 @@ class tensor1d {
     this.add(-scalar);
   }
 
-  void sub(tensor1d tensor) {
-    tensor1d temp = tensor.copy();
+  void sub(Tensor1d Tensor) {
+    Tensor1d temp = Tensor.copy();
     temp.mult(-1);
     this.add(temp);
   }
 
-  void mult(float tensor) {
+  void mult(float Tensor) {
     //SCALAR PRODUCT
     for (int i = 0; i < this.size(); i++) {
-      this.data[i] *= tensor;
+      this.data[i] *= Tensor;
     }
   }
 
-  void mult(tensor1d tensor) {
+  void mult(Tensor1d Tensor) {
     //hadamard PRODUCT
     for (int i = 0; i < this.size(); i++) {
-      this.data[i] *= tensor.data[i];
+      this.data[i] *= Tensor.data[i];
     }
   }
 
@@ -226,9 +227,9 @@ class tensor1d {
     this.mult(1.0 / scalar);
   }
 
-  void div(tensor1d tensor) {
+  void div(Tensor1d Tensor) {
     for (int i = 0; i < this.size(); i++) {
-      this.data[i] /= tensor.data[i];
+      this.data[i] /= Tensor.data[i];
     }
   }
 
@@ -238,9 +239,9 @@ class tensor1d {
     }
   }
 
-  void pow(tensor1d tensor) {
+  void pow(Tensor1d Tensor) {
     for (int i = 0; i < this.size(); i++) {
-      this.data[i] = sketch.pow(this.data[i], tensor.data[i]);
+      this.data[i] = sketch.pow(this.data[i], Tensor.data[i]);
     }
   }
 
@@ -309,54 +310,60 @@ class tensor1d {
 
 }
 
-tensor1d reverse(tensor1d tensor) {
-  return new tensor1d(sketch.reverse(tensor.data));
+Tensor1d oneHot(int index, int depth) {
+  Tensor1d Tensor = createTensor(depth);
+  Tensor.set(index, 1);
+  return Tensor;
 }
 
-tensor1d mult(tensor1d a, tensor1d b) {
+Tensor1d reverse(Tensor1d Tensor) {
+  return new Tensor1d(sketch.reverse(Tensor.data));
+}
+
+Tensor1d mult(Tensor1d a, Tensor1d b) {
   if (a.size() != b.size()) {
     println("error: mult " + a +", "+ b);
     return null;
   }
 
-  tensor1d tensor = new tensor1d(a.size());
+  Tensor1d Tensor = new Tensor1d(a.size());
 
-  for (int i = 0; i < tensor.size(); i++) {
-    tensor.data[i] = a.data[i] * b.data[i];
+  for (int i = 0; i < Tensor.size(); i++) {
+    Tensor.data[i] = a.data[i] * b.data[i];
   }
 
-  return tensor;
+  return Tensor;
 }
 
-tensor1d add(tensor1d a, tensor1d b) {
+Tensor1d add(Tensor1d a, Tensor1d b) {
   if (a.size() != b.size()) {
     println("error: add " + a + ", " + b);
     return null;
   }
 
-  tensor1d tensor = new tensor1d(a.size());
+  Tensor1d Tensor = new Tensor1d(a.size());
 
   for (int i = 0; i < b.size(); i++) {
-    tensor.data[i] = a.data[i] + b.data[i];
+    Tensor.data[i] = a.data[i] + b.data[i];
   }
-  return tensor;
+  return Tensor;
 }
 
-tensor1d sub(tensor1d a, tensor1d b) {
+Tensor1d sub(Tensor1d a, Tensor1d b) {
   if (a.size() != b.size()) {
     println("error: sub " + a + ", " + b);
     return null;
   }
 
-  tensor1d tensor = new tensor1d(a.size());
+  Tensor1d Tensor = new Tensor1d(a.size());
 
   for (int i = 0; i < b.size(); i++) {
-    tensor.data[i] = a.data[i] - b.data[i];
+    Tensor.data[i] = a.data[i] - b.data[i];
   }
-  return tensor;
+  return Tensor;
 }
 
-tensor1d mult(tensor2d a, tensor1d b) {
+Tensor1d mult(Tensor2d a, Tensor1d b) {
   if (a.cols() != b.size()) {
     println("error: " + a.cols() +", "+ b.size());
     a.print();
@@ -364,41 +371,38 @@ tensor1d mult(tensor2d a, tensor1d b) {
     return null;
   }
 
-  tensor1d tensor = createTensor(a.rows());
+  Tensor1d Tensor = createTensor(a.rows());
 
-  for(int i = 0; i < tensor.size(); i++) {
+  for(int i = 0; i < Tensor.size(); i++) {
     float sum = 0;
-    tensor1d sumH = createTensor(0);
     for(int j = 0; j < a.cols(); j++) {
       float val = b.data[j] * a.get(i, j);
       sum += val;
-      sumH.push(val);
     }
-    tensor.data[i] = sum;// b.data[i % b.size()]*a.getFloat(i);
+    Tensor.data[i] = sum;// b.data[i % b.size()]*a.getFloat(i);
   }
 
-  return tensor;
+  return Tensor;
 }
-
 
 
 //-------------------------------------------------------------
 
 
 
-class tensor2d {
+class Tensor2d {
 
   private float data[][];
 
-  tensor2d() {
+  Tensor2d() {
     this.data = new float[0][0];
   }
 
-  tensor2d(int rows, int cols) {
+  Tensor2d(int rows, int cols) {
     this.data = new float[rows][cols];
   }
 
-  tensor2d(float[][] data) {
+  Tensor2d(float[][] data) {
     if(data.length != 0) {
       this.data = new float[data.length][data[0].length];
 
@@ -408,7 +412,7 @@ class tensor2d {
     }
   }
 
-  tensor2d(JSONObject JTensor2d) {
+  Tensor2d(JSONObject JTensor2d) {
     JSONArray JData = JTensor2d.getJSONArray("data");
 
     this.data = new float[JTensor2d.getInt("rows")][JTensor2d.getInt("cols")];
@@ -426,7 +430,7 @@ class tensor2d {
 
   /*INITIALIZATION && CONVERTION FUNCTIONS*/
 
-  tensor2d copy() {
+  Tensor2d copy() {
     return createTensor(data);
   }
 
@@ -453,12 +457,12 @@ class tensor2d {
     return JTensor2d;
   }
 
-  tensor1d toTensor1d() {
-    tensor1d tensor = new tensor1d();
+  Tensor1d toTensor1d() {
+    Tensor1d Tensor = new Tensor1d();
     for(int i = 0; i < size(); i++) {
-      tensor.push(getFloat(i));
+      Tensor.push(getFloat(i));
     }
-    return tensor;
+    return Tensor;
   }
 
   float[][] toArray() {
@@ -471,7 +475,7 @@ class tensor2d {
   }
 
   void resize(int rows, int cols) {
-    tensor2d newtensor = new tensor2d(rows, cols);
+    Tensor2d newTensor = new Tensor2d(rows, cols);
     rows = max(this.rows(), rows);
     cols = max(this.cols(), cols);
     int totalsize = size();
@@ -482,17 +486,17 @@ class tensor2d {
       if(i < totalsize) {
         newval = getFloat(i);
       }
-      newtensor.set(i, newval);
+      newTensor.set(i, newval);
     }
 
-    data = newtensor.data;
+    data = newTensor.data;
   }
 
   void push(float[] temp) {
     data = (float[][]) append(data, temp);
   }
 
-  void push(tensor1d temp) {
+  void push(Tensor1d temp) {
     push(temp.toArray());
   }
 
@@ -517,7 +521,7 @@ class tensor2d {
     data = newdata;
   }
 
-  void pushRow(tensor1d f) {
+  void pushRow(Tensor1d f) {
     pushRow(f.toArray());
   }
 
@@ -542,7 +546,7 @@ class tensor2d {
     data = newdata;
   }
 
-  void pushCol(tensor1d f) {
+  void pushCol(Tensor1d f) {
     pushCol(f.toArray());
   }
 
@@ -551,13 +555,13 @@ class tensor2d {
     data = (float[][]) concat(data, f);
   }
 
-  void push(tensor2d f) {
+  void push(Tensor2d f) {
     push(f.toArray());
   }
 
   /*INFO FUNCTIONS*/
 
-  boolean equals(tensor2d a) {
+  boolean equals(Tensor2d a) {
 
     if(rows() != a.rows() || cols() != a.cols()) {
       return false;
@@ -626,8 +630,8 @@ class tensor2d {
   }
 
 
-  tensor1d get(int i) {
-    return new tensor1d(data[i]);
+  Tensor1d get(int i) {
+    return new Tensor1d(data[i]);
   }
 
   float getFloat(int i) {
@@ -692,14 +696,14 @@ class tensor2d {
     }
   }
 
-  void add(tensor2d tensor) {
-    if (tensor.rows() != this.rows() || tensor.cols() != this.cols()) {
+  void add(Tensor2d Tensor) {
+    if (Tensor.rows() != this.rows() || Tensor.cols() != this.cols()) {
       throw new ArithmeticException("add error: 53");
     }
 
     for (int i = 0; i < this.rows(); i++) {
       for (int j = 0; j < this.cols(); j++) {
-        this.data[i][j] += tensor.data[i][j];
+        this.data[i][j] += Tensor.data[i][j];
       }
     }
   }
@@ -708,10 +712,10 @@ class tensor2d {
     this.add(-scalar);
   }
 
-  void sub(tensor2d tensor) {
-    for (int i = 0; i < tensor.rows(); i++) {
-      for (int j = 0; j < tensor.cols(); j++) {
-        this.data[i][j] = this.data[i][j] - tensor.data[i][j];
+  void sub(Tensor2d Tensor) {
+    for (int i = 0; i < Tensor.rows(); i++) {
+      for (int j = 0; j < Tensor.cols(); j++) {
+        this.data[i][j] = this.data[i][j] - Tensor.data[i][j];
       }
     }
   }
@@ -725,11 +729,11 @@ class tensor2d {
     }
   }
 
-  void mult(tensor2d tensor) {
+  void mult(Tensor2d Tensor) {
     //hadamard PRODUCT
     for (int i = 0; i < this.rows(); i++) {
       for (int j = 0; j < this.cols(); j++) {
-        this.data[i][j] *= tensor.data[i][j];
+        this.data[i][j] *= Tensor.data[i][j];
       }
     }
   }
@@ -739,9 +743,9 @@ class tensor2d {
     this.mult(scalar);
   }
 
-  void div(tensor2d tensor) {
+  void div(Tensor2d Tensor) {
     for (int i = 0; i < this.size(); i++) {
-      float val = getFloat(i) / tensor.getFloat(i);
+      float val = getFloat(i) / Tensor.getFloat(i);
       this.set(i, val);
     }
   }
@@ -753,9 +757,9 @@ class tensor2d {
     }
   }
 
-  void pow(tensor2d tensor) {
+  void pow(Tensor2d Tensor) {
     for (int i = 0; i < this.size(); i++) {
-      float val = sketch.pow(getFloat(i), tensor.getFloat(i));
+      float val = sketch.pow(getFloat(i), Tensor.getFloat(i));
       this.set(i, val);
     }
   }
@@ -831,74 +835,74 @@ class tensor2d {
 
 }
 
-tensor2d transpose(tensor2d tensor) {
-  tensor2d tor = new tensor2d(tensor.cols(), tensor.rows());
+Tensor2d transpose(Tensor2d Tensor) {
+  Tensor2d tor = new Tensor2d(Tensor.cols(), Tensor.rows());
 
-  for (int i = 0; i < tensor.rows(); i++) {
-    for (int j = 0; j < tensor.cols(); j++) {
-      tor.data[j][i] = tensor.data[i][j];
+  for (int i = 0; i < Tensor.rows(); i++) {
+    for (int j = 0; j < Tensor.cols(); j++) {
+      tor.data[j][i] = Tensor.data[i][j];
     }
   }
   return tor;
 }
 
-tensor2d mult(tensor2d a, tensor2d b) {
+Tensor2d mult(Tensor2d a, Tensor2d b) {
   if (a.cols() != b.rows()) {
     println("error: mult " + a +", "+ b);
     return null;
   }
 
-  tensor2d tensor = new tensor2d(a.rows(), b.cols());
-  for (int i = 0; i < tensor.rows(); i++) {
+  Tensor2d Tensor = new Tensor2d(a.rows(), b.cols());
+  for (int i = 0; i < Tensor.rows(); i++) {
 
-    for (int j = 0; j < tensor.cols(); j++) {
+    for (int j = 0; j < Tensor.cols(); j++) {
 
       float sum = 0;
       for (int k = 0; k < a.cols(); k++) {
         sum += a.data[i][k] * b.data[k][j];
       }
 
-      tensor.data[i][j] = sum;
+      Tensor.data[i][j] = sum;
     }
   }
-  return tensor;
+  return Tensor;
 }
 
-tensor2d sub(tensor2d a, tensor2d b) {
+Tensor2d sub(Tensor2d a, Tensor2d b) {
   if (a.cols() != b.cols() || a.rows() != b.rows()) {
     println("error: sub " + a + ", " + b);
     return null;
   }
 
-  tensor2d tensor = new tensor2d(a.rows(), a.cols());
+  Tensor2d Tensor = new Tensor2d(a.rows(), a.cols());
   for (int i = 0; i < b.rows(); i++) {
     for (int j = 0; j < b.cols(); j++) {
-      tensor.data[i][j] = a.data[i][j] - b.data[i][j];
+      Tensor.data[i][j] = a.data[i][j] - b.data[i][j];
     }
   }
-  return tensor;
+  return Tensor;
 }
 
 
 
 
 
-tensor1d createTensor(int length) {
-  return new tensor1d(length);
+Tensor1d createTensor(int length) {
+  return new Tensor1d(length);
 }
 
-tensor1d createTensor(float[] dat) {
-  return new tensor1d(dat);
+Tensor1d createTensor(float[] dat) {
+  return new Tensor1d(dat);
 }
 
-tensor2d createTensor(int rows, int cols) {
-  return new tensor2d(rows, cols);
+Tensor2d createTensor(int rows, int cols) {
+  return new Tensor2d(rows, cols);
 }
 
-tensor2d createTensor(float[][] dat) {
-  return new tensor2d(dat);
+Tensor2d createTensor(float[][] dat) {
+  return new Tensor2d(dat);
 }
 
-tensor2d createTensor(JSONObject tensor2) {
-  return new tensor2d(tensor2);
+Tensor2d createTensor(JSONObject Tensor2) {
+  return new Tensor2d(Tensor2);
 }
